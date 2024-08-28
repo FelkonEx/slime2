@@ -1,5 +1,6 @@
 import getBTTVChannelEmotes from '@/services/emotes/BetterTTV'
 import getFFZChannelEmotes from '@/services/emotes/FrankerFaceZ'
+import getSevenTvChannelEmotes from '@/services/emotes/SevenTv'
 
 import { useQuery } from '@tanstack/react-query'
 import useTwitchBroadcaster from './useBroadcaster'
@@ -18,6 +19,7 @@ export default function useThirdPartyEmotes() {
       >([
         getBTTVChannelEmotes('twitch', broadcaster!.id),
         getFFZChannelEmotes('twitch', broadcaster!.id),
+        getSevenTvChannelEmotes('twitch', broadcaster!.id),
       ])
 
       thirdPartyEmotes.forEach(emotes => {

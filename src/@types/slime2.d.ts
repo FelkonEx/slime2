@@ -125,7 +125,7 @@ namespace Slime2 {
       type EmoteMap = Map<string, Emote>
 
       namespace Emote {
-        type Source = Platform | 'betterttv' | 'frankerfacez'
+        type Source = Platform | 'betterttv' | 'frankerfacez' | 'seventv'
 
         type Images = {
           default: Urls
