@@ -1,4 +1,4 @@
-# slime2 (with 7TV enabled)
+# slime2 (with 7tv enabled)
 
 Built with [Vite](https://vitejs.dev/) using [React](https://react.dev/)
 
