@@ -24,7 +24,7 @@ const entryFileNames = 'slime2.js'
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => {
   let publicRoot = 'widgets'
-  let widget = 'slime-chat'
+  let widget = 'custom-slime-chat'
   let outDir = 'release'
 
   const widgetMode = ['debug', 'production', 'development'].every(
@@ -103,7 +103,7 @@ export default defineConfig(({ command, mode }) => {
     publicDir,
     base:
       command === 'build'
-        ? `https://cdn.jsdelivr.net/gh/zaytri/slime2@${version}/release/`
+        ? `https://cdn.jsdelivr.net/gh/FelkonEx/slime2/release/`
         : '/',
     build: {
       outDir,
