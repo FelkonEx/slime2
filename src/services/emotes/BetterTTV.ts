@@ -8,20 +8,34 @@ export default async function getChannelEmotes(
   platform: Slime2.Platform,
   userId: string,
 ): Promise<Slime2.Event.Message.EmoteMap> {
-  const emoteMap = new Map<string, Slime2.Event.Message.Emote>()
+  const bttvEmoteMap = new Map<string, Slime2.Event.Message.Emote>()
+
+  // Get Global Emotes First
+  const globalEmotes = await bttvApi
+    .get<BetterTTV.ChannelEmote[]>('/emotes/global')
+    .then(response => response.data)
+    .catch(() => null)
+
+  if (globalEmotes) {
+    setEmotes(globalEmotes, bttvEmoteMap)
+  }
 
   const user = await bttvApi
     .get<BetterTTV.UserResponse>(`/users/${platform}/${userId}`)
     .then(response => response.data)
     .catch(() => null)
-  if (!user) return emoteMap // BTTV API error
+
+  if (!user) return bttvEmoteMap
 
   const { channelEmotes, sharedEmotes } = user
 
   // if these aren't defined then the API returned an error
-  if (!channelEmotes || !sharedEmotes) return emoteMap
+  if (!channelEmotes || !sharedEmotes) return bttvEmoteMap
 
-  function setEmotes(emotes: BetterTTV.Emote[]) {
+  function setEmotes(
+    emotes: BetterTTV.Emote[],
+    emoteMap: Map<string, Slime2.Event.Message.Emote>,
+  ) {
     emotes.forEach(emote => {
       emoteMap.set(emote.code, {
         id: emote.id,
@@ -35,10 +49,10 @@ export default async function getChannelEmotes(
     })
   }
 
-  setEmotes(channelEmotes)
-  setEmotes(sharedEmotes)
+  setEmotes(channelEmotes, bttvEmoteMap)
+  setEmotes(sharedEmotes, bttvEmoteMap)
 
-  return emoteMap
+  return bttvEmoteMap
 }
 
 function buildEmoteUrls(

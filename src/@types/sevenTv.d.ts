@@ -1,5 +1,5 @@
 namespace SevenTV {
-  type Response = {
+  type UserResponse = {
     id: string
     platform: string
     username: string

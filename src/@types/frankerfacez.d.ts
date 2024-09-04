@@ -3,16 +3,23 @@
 namespace FrankerFaceZ {
   type RoomResponse = {
     room: Room
-    sets: {
-      // key is the set ID
-      [key: string]: {
-        id: number // same as key
-        _type: number // no clue what this means
-        icon?: string // could be an image url
-        title?: string
-        css?: string // probably deprecated
-        emoticons: Emote[]
-      }
+    sets: Sets
+  }
+
+  type SetResponse = RoomResponse & {
+    room?: Room
+    default_sets: number[]
+  }
+
+  type Sets = {
+    // key is the set ID
+    [key: string]: {
+      id: number // same as key
+      _type: number // no clue what this means
+      icon?: string // could be an image url
+      title?: string
+      css?: string // probably deprecated
+      emoticons: Emote[]
     }
   }
 

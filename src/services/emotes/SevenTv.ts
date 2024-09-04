@@ -8,36 +8,52 @@ export default async function getChannelEmotes(
   platform: Slime2.Platform,
   userId: string,
 ): Promise<Slime2.Event.Message.EmoteMap> {
-  const emoteMap = new Map<string, Slime2.Event.Message.Emote>()
+  const sevenTvEmoteMap = new Map<string, Slime2.Event.Message.Emote>()
 
-  const user = await sevenTvApi
-    .get<SevenTV.Response>(`/users/${platform}/${userId}`)
+  // Get Global Emotes First
+  const global = await sevenTvApi
+    .get<SevenTV.EmoteSet>('/emote-sets/global')
     .then(response => response.data)
     .catch(() => null)
-  if (!user) return emoteMap
 
-  const { emotes } = user.emote_set
+  if (global) {
+    const { emotes: globalEmotes } = global
 
-  // if these aren't defined then the API returned an error
-  if (!emotes) return emoteMap
-
-  function setEmotes(emotes: SevenTV.Emote[]) {
-    emotes.forEach(emote => {
-      emoteMap.set(emote.name, {
-        id: emote.id,
-        name: emote.name,
-        images: {
-          default: buildEmoteUrls(emote.id),
-          static: buildEmoteUrls(emote.id, true),
-        },
-        source: 'seventv',
-      })
-    })
+    if (globalEmotes) {
+      setEmotes(globalEmotes, sevenTvEmoteMap)
+    }
   }
 
-  setEmotes(emotes)
+  // Get User Emotes Second
+  const user = await sevenTvApi
+    .get<SevenTV.UserResponse>(`/users/${platform}/${userId}`)
+    .then(response => response.data)
+    .catch(() => null)
 
-  return emoteMap
+  if (!user) return sevenTvEmoteMap
+  const { emotes: userEmotes } = user.emote_set
+  if (!userEmotes) return sevenTvEmoteMap
+
+  setEmotes(userEmotes, sevenTvEmoteMap)
+
+  return sevenTvEmoteMap
+}
+
+function setEmotes(
+  emotes: SevenTV.Emote[],
+  emoteMap: Map<string, Slime2.Event.Message.Emote>,
+) {
+  emotes.forEach(emote => {
+    emoteMap.set(emote.name, {
+      id: emote.id,
+      name: emote.name,
+      images: {
+        default: buildEmoteUrls(emote.id),
+        static: buildEmoteUrls(emote.id, true),
+      },
+      source: 'seventv',
+    })
+  })
 }
 
 function buildEmoteUrls(
@@ -45,7 +61,7 @@ function buildEmoteUrls(
   staticEmote: boolean = false,
 ): Slime2.Event.Message.Emote.Urls {
   function buildEmoteUrl(size: 1 | 2 | 3 | 4) {
-    const baseURL = 'https://cdn.7tv.app/emote';
+    const baseURL = 'https://cdn.7tv.app/emote'
     return `${baseURL}/${id}/${size}x${staticEmote ? '_static' : ''}.webp`
   }
 

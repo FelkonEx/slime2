@@ -8,7 +8,20 @@ export default async function getChannelEmotes(
   platform: Slime2.Platform,
   userId: string,
 ): Promise<Slime2.Event.Message.EmoteMap> {
-  const emoteMap = new Map<string, Slime2.Event.Message.Emote>()
+  const ffzEmoteMap = new Map<string, Slime2.Event.Message.Emote>()
+
+  const globalEmoteResponse = await ffzApi
+    .get<FrankerFaceZ.SetResponse>('/set/global')
+    .then(response => response.data)
+    .catch(() => null)
+
+  if (globalEmoteResponse) {
+    const {sets: globalSets} = globalEmoteResponse
+
+    if (globalSets) {
+      setEmotes(globalSets, ffzEmoteMap)
+    }
+  }
 
   const roomResponse = await ffzApi
     .get<FrankerFaceZ.RoomResponse>(
@@ -16,13 +29,20 @@ export default async function getChannelEmotes(
     )
     .then(response => response.data)
     .catch(() => null)
-  if (!roomResponse) return emoteMap // FFZ API error
 
-  const { sets } = roomResponse
+  if (!roomResponse) return ffzEmoteMap
+  const { sets: roomSets } = roomResponse
+  if (!roomSets) return ffzEmoteMap
 
-  // if this isn't defined then the API returned an error
-  if (!sets) return emoteMap
+  setEmotes(roomSets, ffzEmoteMap)
 
+  return ffzEmoteMap
+}
+
+function setEmotes(
+  sets: FrankerFaceZ.Sets,
+  emoteMap: Map<string, Slime2.Event.Message.Emote>,
+) {
   Object.keys(sets).forEach(id => {
     sets[id].emoticons.forEach(emote => {
       emoteMap.set(emote.name, {
